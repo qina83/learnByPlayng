@@ -97,8 +97,10 @@ let currentColor = '';
 let currentColorSet = [];
 let currentNumber = 0;
 let currentNumberSet = [];
+let currentAnimal = '';
+let currentAnimalSet = [];
 let gameActive = false;
-let currentGameType = 'colors'; // 'colors' or 'numbers'
+let currentGameType = 'colors'; // 'colors', 'numbers', or 'animals'
 let speechSynthesis = window.speechSynthesis;
 let recognition = null;
 
@@ -116,6 +118,26 @@ const colorPalette = [
     { name: 'white', color: '#FFFFFF', labelIt: 'bianco', labelEs: 'blanco', labelEn: 'white' },
     { name: 'gray', color: '#808080', labelIt: 'grigio', labelEs: 'gris', labelEn: 'gray' },
     { name: 'cyan', color: '#00FFFF', labelIt: 'ciano', labelEs: 'cian', labelEn: 'cyan' }
+];
+
+// Palette di animali con emoji e traduzioni
+const animalPalette = [
+    { name: 'dog', emoji: '🐶', labelIt: 'cane', labelEs: 'perro', labelEn: 'dog' },
+    { name: 'cat', emoji: '🐱', labelIt: 'gatto', labelEs: 'gato', labelEn: 'cat' },
+    { name: 'cow', emoji: '🐄', labelIt: 'mucca', labelEs: 'vaca', labelEn: 'cow' },
+    { name: 'pig', emoji: '🐷', labelIt: 'maiale', labelEs: 'cerdo', labelEn: 'pig' },
+    { name: 'horse', emoji: '🐴', labelIt: 'cavallo', labelEs: 'caballo', labelEn: 'horse' },
+    { name: 'sheep', emoji: '🐑', labelIt: 'pecora', labelEs: 'oveja', labelEn: 'sheep' },
+    { name: 'chicken', emoji: '🐔', labelIt: 'pollo', labelEs: 'pollo', labelEn: 'chicken' },
+    { name: 'duck', emoji: '🦆', labelIt: 'anatra', labelEs: 'pato', labelEn: 'duck' },
+    { name: 'rabbit', emoji: '🐇', labelIt: 'coniglio', labelEs: 'conejo', labelEn: 'rabbit' },
+    { name: 'mouse', emoji: '🐭', labelIt: 'topo', labelEs: 'ratón', labelEn: 'mouse' },
+    { name: 'lion', emoji: '🦁', labelIt: 'leone', labelEs: 'león', labelEn: 'lion' },
+    { name: 'elephant', emoji: '🐘', labelIt: 'elefante', labelEs: 'elefante', labelEn: 'elephant' },
+    { name: 'tiger', emoji: '🐅', labelIt: 'tigre', labelEs: 'tigre', labelEn: 'tiger' },
+    { name: 'bear', emoji: '🐻', labelIt: 'orso', labelEs: 'oso', labelEn: 'bear' },
+    { name: 'monkey', emoji: '🐒', labelIt: 'scimmia', labelEs: 'mono', labelEn: 'monkey' },
+    { name: 'fish', emoji: '🐟', labelIt: 'pesce', labelEs: 'pez', labelEn: 'fish' }
 ];
 
 // Inizializzazione
@@ -155,6 +177,8 @@ function setupEventListeners() {
                 startColorGame();
             } else if (game === 'numbers') {
                 startNumberGame();
+            } else if (game === 'animals') {
+                startAnimalGame();
             }
         });
     });
@@ -168,6 +192,11 @@ function setupEventListeners() {
     document.getElementById('numberBackBtn').addEventListener('click', () => showScreen('gameScreen'));
     document.getElementById('numberPlayAgainBtn').addEventListener('click', playNumberSound);
     document.getElementById('numberNextRoundBtn').addEventListener('click', nextRound);
+
+    // Controlli gioco animali
+    document.getElementById('animalBackBtn').addEventListener('click', () => showScreen('gameScreen'));
+    document.getElementById('animalPlayAgainBtn').addEventListener('click', playAnimalSound);
+    document.getElementById('animalNextRoundBtn').addEventListener('click', nextRound);
 
     // Click sui quadrati colorati
     document.querySelectorAll('.color-square').forEach(square => {
@@ -183,6 +212,15 @@ function setupEventListeners() {
         square.addEventListener('click', function () {
             if (gameActive && currentGameType === 'numbers') {
                 checkNumber(this.dataset.number);
+            }
+        });
+    });
+
+    // Click sui quadrati degli animali
+    document.querySelectorAll('.animal-square').forEach(square => {
+        square.addEventListener('click', function () {
+            if (gameActive && currentGameType === 'animals') {
+                checkAnimal(this.dataset.animal);
             }
         });
     });
@@ -227,6 +265,8 @@ function updateLanguageTexts() {
     document.getElementById('gameInstruction').textContent = lang.instruction;
     document.getElementById('numberGameTitle').textContent = `🔢 ${lang.games.numbers}`;
     document.getElementById('numberGameInstruction').textContent = lang.instruction.replace('colore', 'numero').replace('color', 'number').replace('color', 'número');
+    document.getElementById('animalGameTitle').textContent = `🐶 ${lang.games.animals}`;
+    document.getElementById('animalGameInstruction').textContent = lang.instruction.replace('colore', 'animale').replace('color', 'animal').replace('color', 'animal');
 
     // Aggiorna nomi dei giochi
     document.getElementById('colorsGameLabel').textContent = lang.games.colors;
@@ -293,9 +333,9 @@ function startColorGame() {
     nextRound();
 }
 
-function startNumberGame() {
-    currentGameType = 'numbers';
-    showScreen('numberGameScreen');
+function startAnimalGame() {
+    currentGameType = 'animals';
+    showScreen('animalGameScreen');
     resetGame();
     nextRound();
 }
@@ -304,6 +344,7 @@ function resetGame() {
     gameActive = false;
     currentColor = '';
     currentNumber = 0;
+    currentAnimal = '';
 
     if (currentGameType === 'colors') {
         document.querySelectorAll('.color-square').forEach(square => {
@@ -317,6 +358,12 @@ function resetGame() {
         });
         document.getElementById('numberFeedback').textContent = '';
         document.getElementById('numberNextRoundBtn').style.display = 'none';
+    } else if (currentGameType === 'animals') {
+        document.querySelectorAll('.animal-square').forEach(square => {
+            square.classList.remove('correct', 'wrong');
+        });
+        document.getElementById('animalFeedback').textContent = '';
+        document.getElementById('animalNextRoundBtn').style.display = 'none';
     }
 }
 
@@ -344,6 +391,17 @@ function nextRound() {
 
         setTimeout(() => {
             playNumberSound();
+        }, 1000);
+    } else if (currentGameType === 'animals') {
+        // Genera una nuova combinazione di 4 animali casuali
+        generateNewAnimals();
+
+        // Seleziona uno dei 4 animali come quello da indovinare
+        const randomIndex = Math.floor(Math.random() * 4);
+        currentAnimal = currentAnimalSet[randomIndex];
+
+        setTimeout(() => {
+            playAnimalSound();
         }, 1000);
     }
 }
@@ -598,6 +656,89 @@ function checkNumber(selectedNumberIndex) {
         // Per le risposte sbagliate, mostra il pulsante per continuare
         setTimeout(() => {
             document.getElementById('numberNextRoundBtn').style.display = 'block';
+        }, 2000);
+    }
+}
+
+// Funzioni per il gioco degli animali
+function generateNewAnimals() {
+    // Seleziona 4 animali casuali dalla palette assicurandosi che siano diversi
+    const availableAnimals = [...animalPalette];
+    currentAnimalSet = [];
+
+    for (let i = 0; i < 4; i++) {
+        const randomIndex = Math.floor(Math.random() * availableAnimals.length);
+        const selectedAnimal = availableAnimals.splice(randomIndex, 1)[0];
+        currentAnimalSet.push(selectedAnimal);
+    }
+
+    // Aggiorna i quadrati con i nuovi animali
+    const animalSquares = document.querySelectorAll('.animal-square');
+    animalSquares.forEach((square, index) => {
+        square.textContent = currentAnimalSet[index].emoji;
+        square.dataset.animal = index.toString();
+    });
+}
+
+function getAnimalLabel(animalObj) {
+    switch (currentLanguage) {
+        case 'it': return animalObj.labelIt;
+        case 'es': return animalObj.labelEs;
+        case 'en': return animalObj.labelEn;
+        default: return animalObj.labelIt;
+    }
+}
+
+function playAnimalSound() {
+    if (currentAnimal) {
+        const animalLabel = getAnimalLabel(currentAnimal);
+        speak(animalLabel);
+        gameActive = true;
+    }
+}
+
+function checkAnimal(selectedAnimalIndex) {
+    if (!gameActive) return;
+
+    gameActive = false;
+    const feedback = document.getElementById('animalFeedback');
+    const selectedSquare = document.querySelector(`[data-animal="${selectedAnimalIndex}"]`);
+
+    // Trova l'indice dell'animale corretto
+    const correctIndex = currentAnimalSet.findIndex(animal => animal === currentAnimal);
+    const correctSquare = document.querySelector(`[data-animal="${correctIndex}"]`);
+
+    if (parseInt(selectedAnimalIndex) === correctIndex) {
+        // Risposta corretta
+        selectedSquare.classList.add('correct');
+        feedback.textContent = languages[currentLanguage].feedback.correct;
+        feedback.className = 'feedback success';
+
+        currentScore++;
+        document.getElementById('score').textContent = `🏆 ${currentScore}`;
+
+        speak(languages[currentLanguage].feedback.correct.replace('🎉 ', ''));
+
+        // Passa automaticamente al prossimo round dopo 1.5 secondi
+        setTimeout(() => {
+            nextRound();
+        }, 1500);
+
+    } else {
+        // Risposta sbagliata
+        selectedSquare.classList.add('wrong');
+        correctSquare.classList.add('correct');
+
+        const wrongMsg = languages[currentLanguage].feedback.wrong
+            .replace('{color}', getAnimalLabel(currentAnimal));
+        feedback.textContent = wrongMsg;
+        feedback.className = 'feedback error';
+
+        speak(wrongMsg.replace('❌ ', ''));
+
+        // Per le risposte sbagliate, mostra il pulsante per continuare
+        setTimeout(() => {
+            document.getElementById('animalNextRoundBtn').style.display = 'block';
         }, 2000);
     }
 }

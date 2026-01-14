@@ -26,3 +26,6 @@ Gioco dei colori
 Gioco dei numeri
 - è come il gioco dei colori, ma con i numeri
 
+Gioco degli animali
+- è come il gioco dei colori, ma con i gli animali
+

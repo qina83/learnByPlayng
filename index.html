@@ -64,8 +64,8 @@
                 🔢
                 <span id="numbersGameLabel">Numeri</span>
             </button>
-            <button class="game-btn locked">
-                🔒
+            <button class="game-btn" data-game="animals">
+                🐶
                 <span id="animalsGameLabel">Animali</span>
             </button>
             <button class="game-btn locked">
@@ -117,6 +117,28 @@
             <button id="numberNextRoundBtn" class="next-btn" style="display: none;">➡️</button>
         </div>
         <div class="feedback" id="numberFeedback"></div>
+    </div>
+
+    <!-- Gioco degli animali -->
+    <div id="animalGameScreen" class="screen">
+        <div class="game-header">
+            <button id="animalBackBtn" class="back-btn">↩️</button>
+            <h2 id="animalGameTitle">🐶 Gioco degli Animali</h2>
+        </div>
+        <div class="game-instruction" id="animalGameInstruction">
+            Clicca l'animale che senti!
+        </div>
+        <div class="animal-grid">
+            <div class="animal-square" data-animal="0"></div>
+            <div class="animal-square" data-animal="1"></div>
+            <div class="animal-square" data-animal="2"></div>
+            <div class="animal-square" data-animal="3"></div>
+        </div>
+        <div class="game-controls">
+            <button id="animalPlayAgainBtn" class="play-btn">🔊</button>
+            <button id="animalNextRoundBtn" class="next-btn" style="display: none;">➡️</button>
+        </div>
+        <div class="feedback" id="animalFeedback"></div>
     </div>
 
     <!-- Audio elements -->
