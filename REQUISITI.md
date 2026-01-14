@@ -14,6 +14,7 @@ Step 1
 
 Step 2
 - si sceglie il gioco cliccando nell'apposito riquadro. Prevediamo 4 giochi, ma solo il primo pulsante sarà attivo. Gli altri mostreranno un lucchetto
+- nella pagina di selezione dei giochi ci deve essere un puslante per ritornale alla selezione della lingua
 
 Gioco dei colori
 - Vengono mostrati 4 quadrati di colore diverso e il gioco pronuncia il nome di uno

@@ -198,6 +198,9 @@ function setupEventListeners() {
     document.getElementById('animalPlayAgainBtn').addEventListener('click', playAnimalSound);
     document.getElementById('animalNextRoundBtn').addEventListener('click', nextRound);
 
+    // Pulsante per tornare alla selezione lingua
+    document.getElementById('languageBackBtn').addEventListener('click', () => showScreen('languageScreen'));
+
     // Click sui quadrati colorati
     document.querySelectorAll('.color-square').forEach(square => {
         square.addEventListener('click', function () {
