@@ -503,8 +503,22 @@ function speak(text) {
         speechSynthesis.cancel(); // Ferma eventuali speech in corso
         const utterance = new SpeechSynthesisUtterance(text);
         utterance.lang = getLanguageCode(currentLanguage);
-        utterance.rate = 0.8;
-        utterance.pitch = 1.1;
+
+        // Rileva se siamo su mobile per ottimizzare la velocità
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+        if (isMobile) {
+            // Impostazioni ottimizzate per mobile
+            utterance.rate = 1.1;    // Più veloce su mobile
+            utterance.pitch = 1.0;   // Pitch neutro
+            utterance.volume = 1.0;  // Volume massimo
+        } else {
+        // Impostazioni per desktop
+            utterance.rate = 0.8;
+            utterance.pitch = 1.1;
+            utterance.volume = 1.0;
+        }
+
         speechSynthesis.speak(utterance);
     }
 }
