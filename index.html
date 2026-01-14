@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>learn by playing</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Arial', sans-serif;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 30px;
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .name-display {
+            position: fixed;
+            top: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+            display: none;
+            z-index: 1000;
+            animation: slideDown 0.6s ease-out;
+        }
+
+        .name-display.show {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .score-display {
+            font-size: 16px;
+            color: #666;
+            font-weight: normal;
+            background: rgba(255, 255, 255, 0.7);
+            padding: 5px 15px;
+            border-radius: 15px;
+            display: none;
+        }
+
+        .score-display.show {
+            display: block;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateX(-50%) translateY(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+        }
+
+        .language-selector {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            transition: all 0.5s ease;
+        }
+
+        .language-selector.hidden {
+            opacity: 0;
+            transform: translateY(-20px) scale(0.8);
+            pointer-events: none;
+        }
+
+        .language-selector.fade-out {
+            animation: fadeOut 0.5s ease-out forwards;
+        }
+
+        @keyframes fadeOut {
+            from {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+
+            to {
+                opacity: 0;
+                transform: translateY(-20px) scale(0.8);
+            }
+        }
+
+        .flag-button {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: 3px solid transparent;
+            cursor: pointer;
+            font-size: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .flag-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .flag-button.selected {
+            border-color: #fff;
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.05);
+        }
+
+        .round-button {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+            font-size: 40px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .round-button.hidden {
+            display: none;
+        }
+
+        .round-button.show {
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px) scale(0.8);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .round-button:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+            background: linear-gradient(45deg, #ee5a24, #ff6b6b);
+        }
+
+        .round-button:active {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .round-button::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transition: width 0.6s, height 0.6s;
+            transform: translate(-50%, -50%);
+        }
+
+        .round-button:active::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .game-selector {
+            display: none;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            width: 100%;
+            max-width: 300px;
+            margin-top: 20px;
+        }
+
+        .game-selector.show {
+            display: grid;
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .game-button {
+            width: 100px;
+            height: 100px;
+            border-radius: 20px;
+            border: none;
+            font-size: 40px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .game-button.enabled {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            color: white;
+        }
+
+        .game-button.enabled:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .game-button.enabled:active {
+            transform: translateY(-1px);
+        }
+
+        .game-button.disabled {
+            background: linear-gradient(45deg, #cccccc, #999999);
+            color: #666;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .game-button::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transition: width 0.6s, height 0.6s;
+            transform: translate(-50%, -50%);
+        }
+
+        .game-button.enabled:active::before {
+            width: 200px;
+            height: 200px;
+        }
+
+        .numbers-game {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 30px;
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .numbers-game.show {
+            display: flex;
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        .number-display {
+            width: 200px;
+            height: 200px;
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 72px;
+            color: white;
+            font-weight: bold;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+            margin: 20px 0;
+        }
+
+        .game-instructions {
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px 25px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+
+        .listening-indicator {
+            display: none;
+            color: #ffeb3b;
+            font-size: 16px;
+            font-weight: bold;
+            animation: pulse 1.5s infinite;
+        }
+
+        .listening-indicator.show {
+            display: block;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 0.6;
+            }
+
+            50% {
+                opacity: 1;
+            }
+        }
+
+        .feedback {
+            font-size: 20px;
+            font-weight: bold;
+            padding: 10px 20px;
+            border-radius: 15px;
+            margin: 10px 0;
+            display: none;
+        }
+
+        .feedback.correct {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .feedback.incorrect {
+            background: #f44336;
+            color: white;
+        }
+
+        .feedback.show {
+            display: block;
+            animation: bounceIn 0.5s ease-out;
+        }
+
+        @keyframes bounceIn {
+            0% {
+                transform: scale(0.3);
+                opacity: 0;
+            }
+
+            50% {
+                transform: scale(1.05);
+            }
+
+            70% {
+                transform: scale(0.9);
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        /* Ottimizzazione Mobile */
+        @media (max-width: 768px) {
+            body {
+                padding: 20px;
+                min-height: 100vh;
+                height: auto;
+            }
+
+            .container {
+                gap: 40px;
+                width: 100%;
+                max-width: 400px;
+            }
+
+            .name-display {
+                top: 20px;
+                font-size: 20px;
+                padding: 12px 25px;
+            }
+
+            .language-selector {
+                gap: 30px;
+            }
+
+            .flag-button {
+                width: 80px;
+                height: 80px;
+                font-size: 45px;
+                /* Rimuovi hover su mobile per evitare problemi touch */
+            }
+
+            .round-button {
+                width: 140px;
+                height: 140px;
+                font-size: 50px;
+                line-height: 1;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .game-selector {
+                max-width: 280px;
+                gap: 15px;
+            }
+
+            .game-button {
+                width: 90px;
+                height: 90px;
+                font-size: 35px;
+            }
+
+            .number-display {
+                width: 180px;
+                height: 180px;
+                font-size: 64px;
+            }
+
+            .game-instructions {
+                font-size: 16px;
+                padding: 12px 20px;
+            }
+
+            /* Disabilita hover su mobile */
+            .flag-button:hover {
+                transform: none;
+                box-shadow: none;
+            }
+
+            .round-button:hover {
+                transform: none;
+                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+                background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            }
+
+            /* Migliora il feedback touch */
+            .flag-button:active {
+                transform: scale(0.95);
+                background: rgba(255, 255, 255, 0.3);
+            }
+
+            .round-button:active {
+                transform: scale(0.95);
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 15px;
+            }
+
+            .container {
+                gap: 30px;
+            }
+
+            .language-selector {
+                gap: 25px;
+            }
+
+            .flag-button {
+                width: 70px;
+                height: 70px;
+                font-size: 40px;
+            }
+
+            .round-button {
+                width: 120px;
+                height: 120px;
+                font-size: 40px;
+            }
+
+            .game-selector {
+                max-width: 250px;
+                gap: 12px;
+            }
+
+            .game-button {
+                width: 80px;
+                height: 80px;
+                font-size: 30px;
+            }
+        }
+
+        @media (max-width: 320px) {
+            .container {
+                gap: 25px;
+            }
+
+            .language-selector {
+                gap: 20px;
+            }
+
+            .flag-button {
+                width: 60px;
+                height: 60px;
+                font-size: 35px;
+            }
+
+            .round-button {
+                width: 100px;
+                height: 100px;
+                font-size: 35px;
+            }
+        }
+
+        /* Miglioramenti per touch */
+        .flag-button,
+        .round-button,
+        .game-button {
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+
+        /* Supporto per orientamento landscape su mobile */
+        @media (max-height: 500px) and (orientation: landscape) {
+            body {
+                padding: 10px;
+            }
+
+            .container {
+                gap: 20px;
+            }
+
+            .flag-button {
+                width: 50px;
+                height: 50px;
+                font-size: 30px;
+            }
+
+            .round-button {
+                width: 100px;
+                height: 100px;
+                font-size: 35px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="name-display" id="name-display">
+        <div class="score-display" id="score-display">Punteggio: 0</div>
+    </div>
+
+    <div class="container">
+        <div class="language-selector">
+            <div class="flag-button" onclick="selectLanguage('it')" id="flag-it">
+                🇮🇹
+            </div>
+            <div class="flag-button" onclick="selectLanguage('es')" id="flag-es">
+                🇪🇸
+            </div>
+        </div>
+
+        <button class="round-button hidden" onclick="handleClick()" id="main-button">
+            🔊
+        </button>
+
+        <div class="game-selector" id="game-selector">
+            <button class="game-button enabled" onclick="selectGame('numbers')">
+                🔢
+            </button>
+            <button class="game-button disabled">
+                🔒
+            </button>
+            <button class="game-button disabled">
+                🔒
+            </button>
+            <button class="game-button disabled">
+                🔒
+            </button>
+        </div>
+
+        <div class="numbers-game" id="numbers-game">
+            <div class="game-instructions" id="game-instructions">
+                Leggi il numero ad alta voce
+            </div>
+            <div class="number-display" id="number-display">42</div>
+            <div class="listening-indicator" id="listening-indicator">
+                🎤 Ti sto ascoltando...
+            </div>
+            <div class="feedback" id="feedback"></div>
+        </div>
+    </div>
+
+    <script>
+        let selectedLanguage = null;
+        let currentNumber = 0;
+        let score = 0;
+        let gameActive = false;
+        let userName = '';
+
+        const phrases = {
+            it: {
+                question: 'Come ti chiami?',
+                lang: 'it-IT',
+                instructions: 'Leggi il numero ad alta voce',
+                listening: '🎤 Ti sto ascoltando...',
+                correct: 'Corretto!',
+                incorrect: 'Sbagliato!',
+                score: 'Punteggio'
+            },
+            es: {
+                question: '¿Cómo te llamas?',
+                lang: 'es-ES',
+                instructions: 'Lee el número en voz alta',
+                listening: '🎤 Te estoy escuchando...',
+                correct: '¡Correcto!',
+                incorrect: '¡Incorrecto!',
+                score: 'Puntuación'
+            }
+        };
+
+        function selectLanguage(lang) {
+            selectedLanguage = lang;
+
+            // Rimuovi la classe selected da tutte le bandiere
+            document.querySelectorAll('.flag-button').forEach(flag => {
+                flag.classList.remove('selected');
+            });
+
+            // Aggiungi la classe selected alla bandiera selezionata
+            document.getElementById('flag-' + lang).classList.add('selected');
+
+            // Nascondi i pulsanti della lingua con animazione
+            const languageSelector = document.querySelector('.language-selector');
+            languageSelector.classList.add('fade-out');
+
+            // Dopo l'animazione, nascondi completamente i pulsanti
+            setTimeout(() => {
+                languageSelector.style.display = 'none';
+            }, 500);
+
+            // Mostra il pulsante principale con animazione (dopo un breve ritardo)
+            setTimeout(() => {
+                const button = document.getElementById('main-button');
+                button.classList.remove('hidden');
+                button.classList.add('show');
+            }, 250);
+        }
+
+        function handleClick() {
+            if (!selectedLanguage) return;
+
+            const currentPhrase = phrases[selectedLanguage];
+
+            // Nascondi il pulsante immediatamente
+            const button = document.getElementById('main-button');
+            button.style.display = 'none';
+
+            // Verifica se il browser supporta la sintesi vocale
+            if ('speechSynthesis' in window) {
+                // Crea un nuovo oggetto SpeechSynthesisUtterance
+                const utterance = new SpeechSynthesisUtterance(currentPhrase.question);
+
+                // Imposta la lingua selezionata
+                utterance.lang = currentPhrase.lang;
+
+                // Imposta velocità e volume
+                utterance.rate = 1;
+                utterance.volume = 1;
+
+                // Quando finisce di parlare, inizia il riconoscimento vocale
+                utterance.onend = function () {
+                    setTimeout(() => {
+                        startSpeechRecognition();
+                    }, 500);
+                };
+
+                // Fa pronunciare il testo
+                speechSynthesis.speak(utterance);
+            } else {
+                // Fallback se la sintesi vocale non è supportata
+                alert(currentPhrase.question);
+                setTimeout(() => {
+                    startSpeechRecognition();
+                }, 1000);
+            }
+        }
+
+        function startSpeechRecognition() {
+            // Verifica se il browser supporta il riconoscimento vocale
+            if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                const recognition = new SpeechRecognition();
+
+                recognition.lang = phrases[selectedLanguage].lang;
+                recognition.continuous = false;
+                recognition.interimResults = false;
+                recognition.maxAlternatives = 1;
+
+                recognition.onresult = function (event) {
+                    const name = event.results[0][0].transcript;
+                    displayName(name);
+                };
+
+                recognition.onerror = function (event) {
+                    console.error('Errore riconoscimento vocale:', event.error);
+                    // In caso di errore, mostra un input di testo
+                    const name = prompt(selectedLanguage === 'it' ? 'Dimmi il tuo nome:' : 'Dime tu nombre:');
+                    if (name) {
+                        displayName(name);
+                    }
+                };
+
+                recognition.start();
+            } else {
+                // Fallback se il riconoscimento vocale non è supportato
+                const name = prompt(selectedLanguage === 'it' ? 'Scrivi il tuo nome:' : 'Escribe tu nombre:');
+                if (name) {
+                    displayName(name);
+                }
+            }
+        }
+
+        function displayName(name) {
+            userName = name; // Memorizza il nome per usarlo nei messaggi
+            const nameDisplay = document.getElementById('name-display');
+            const scoreDisplay = document.getElementById('score-display');
+            const greeting = selectedLanguage === 'it' ? 'Ciao' : 'Hola';
+
+            nameDisplay.innerHTML = `<div>${greeting} ${name}!</div>`;
+            nameDisplay.appendChild(scoreDisplay);
+            nameDisplay.classList.add('show');
+
+            updateScoreDisplay();
+
+            // Mostra i pulsanti dei giochi dopo un breve ritardo
+            setTimeout(() => {
+                const gameSelector = document.getElementById('game-selector');
+                gameSelector.classList.add('show');
+            }, 800);
+        }
+
+        function selectGame(gameType) {
+            if (gameType === 'numbers') {
+                // Nascondi i pulsanti dei giochi
+                const gameSelector = document.getElementById('game-selector');
+                gameSelector.style.display = 'none';
+
+                // Mostra il gioco dei numeri
+                startNumbersGame();
+            }
+        }
+
+        function startNumbersGame() {
+            gameActive = true;
+            const numbersGame = document.getElementById('numbers-game');
+            const instructions = document.getElementById('game-instructions');
+            const scoreDisplay = document.getElementById('score-display');
+
+            // Aggiorna le istruzioni nella lingua corretta
+            instructions.textContent = phrases[selectedLanguage].instructions;
+
+            // Mostra il punteggio
+            scoreDisplay.classList.add('show');
+
+            // Mostra il gioco
+            numbersGame.classList.add('show');
+
+            // Genera il primo numero
+            generateNewNumber();
+        }
+
+        function generateNewNumber() {
+            // Genera numero da 1 a 99 (1 o 2 cifre)
+            currentNumber = Math.floor(Math.random() * 99) + 1;
+            const numberDisplay = document.getElementById('number-display');
+            numberDisplay.textContent = currentNumber;
+
+            // Avvia il riconoscimento vocale dopo un breve ritardo
+            setTimeout(() => {
+                startNumberRecognition();
+            }, 1500);
+        }
+
+        function startNumberRecognition() {
+            const listeningIndicator = document.getElementById('listening-indicator');
+            listeningIndicator.textContent = phrases[selectedLanguage].listening;
+            listeningIndicator.classList.add('show');
+
+            if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                const recognition = new SpeechRecognition();
+
+                recognition.lang = phrases[selectedLanguage].lang;
+                recognition.continuous = false;
+                recognition.interimResults = false;
+                recognition.maxAlternatives = 3;
+
+                recognition.onresult = function (event) {
+                    listeningIndicator.classList.remove('show');
+                    const spokenText = event.results[0][0].transcript;
+                    checkAnswer(spokenText);
+                };
+
+                recognition.onerror = function (event) {
+                    console.error('Errore riconoscimento vocale:', event.error);
+                    listeningIndicator.classList.remove('show');
+                    // Riprova automaticamente
+                    setTimeout(() => {
+                        if (gameActive) {
+                            generateNewNumber();
+                        }
+                    }, 2000);
+                };
+
+                recognition.start();
+            } else {
+                // Fallback
+                listeningIndicator.classList.remove('show');
+                const answer = prompt('Scrivi il numero che vedi:');
+                if (answer) {
+                    checkAnswer(answer);
+                }
+            }
+        }
+
+        function checkAnswer(spokenText) {
+            const feedback = document.getElementById('feedback');
+            const normalizedAnswer = normalizeNumberText(spokenText.toLowerCase().trim());
+
+            console.log('Numero corrente:', currentNumber);
+            console.log('Risposta parlata:', spokenText);
+            console.log('Risposta normalizzata:', normalizedAnswer);
+
+            if (parseInt(normalizedAnswer) === currentNumber) {
+                // Risposta corretta
+                score++;
+                feedback.textContent = phrases[selectedLanguage].correct;
+                feedback.className = 'feedback correct show';
+                updateScoreDisplay();
+
+                // Pronuncia "esatto"
+                if ('speechSynthesis' in window) {
+                    const correctMessage = selectedLanguage === 'it' ? 'Esatto!' : '¡Exacto!';
+                    const utterance = new SpeechSynthesisUtterance(correctMessage);
+                    utterance.lang = phrases[selectedLanguage].lang;
+                    utterance.rate = 1;
+                    utterance.volume = 1;
+
+                    // Se è un multiplo di 10, aggiungi messaggio speciale
+                    if (score % 10 === 0) {
+                        const congratsMessage = selectedLanguage === 'it'
+                            ? `Bravo ${userName}, hai raggiunto ${score} punti!`
+                            : `¡Bravo ${userName}, has alcanzado ${score} puntos!`;
+
+                        utterance.onend = function () {
+                            const congratsUtterance = new SpeechSynthesisUtterance(congratsMessage);
+                            congratsUtterance.lang = phrases[selectedLanguage].lang;
+                            congratsUtterance.rate = 1;
+                            congratsUtterance.volume = 1;
+                            speechSynthesis.speak(congratsUtterance);
+                        };
+                    }
+
+                    speechSynthesis.speak(utterance);
+                }
+            } else {
+                // Risposta sbagliata
+                feedback.textContent = `${phrases[selectedLanguage].incorrect} Era ${currentNumber}`;
+                feedback.className = 'feedback incorrect show';
+
+                // Pronuncia il messaggio di errore
+                if ('speechSynthesis' in window) {
+                    const errorMessage = selectedLanguage === 'it'
+                        ? `Sbagliato, era ${currentNumber}`
+                        : `Incorrecto, era ${currentNumber}`;
+
+                    const utterance = new SpeechSynthesisUtterance(errorMessage);
+                    utterance.lang = phrases[selectedLanguage].lang;
+                    utterance.rate = 1;
+                    utterance.volume = 1;
+                    speechSynthesis.speak(utterance);
+                }
+            }
+
+            // Nascondi feedback e genera nuovo numero
+            setTimeout(() => {
+                feedback.classList.remove('show');
+                if (gameActive) {
+                    setTimeout(() => {
+                        generateNewNumber();
+                    }, 500);
+                }
+            }, 2000);
+        }
+
+        function normalizeNumberText(text) {
+            // Rimuovi punteggiatura e spazi extra
+            text = text.replace(/[.,!?;]/g, '').replace(/\s+/g, ' ').trim();
+
+            // Mappa parole italiane/spagnole a numeri
+            const numberMap = {
+                'zero': '0', 'cero': '0',
+                'uno': '1', 'un': '1', 'una': '1',
+                'due': '2', 'dos': '2',
+                'tre': '3', 'tres': '3',
+                'quattro': '4', 'cuatro': '4',
+                'cinque': '5', 'cinco': '5',
+                'sei': '6', 'seis': '6',
+                'sette': '7', 'siete': '7',
+                'otto': '8', 'ocho': '8',
+                'nove': '9', 'nueve': '9',
+                'dieci': '10', 'diez': '10',
+                'undici': '11', 'once': '11',
+                'dodici': '12', 'doce': '12',
+                'tredici': '13', 'trece': '13',
+                'quattordici': '14', 'catorce': '14',
+                'quindici': '15', 'quince': '15',
+                'sedici': '16', 'dieciséis': '16',
+                'diciassette': '17', 'diecisiete': '17',
+                'diciotto': '18', 'dieciocho': '18',
+                'diciannove': '19', 'diecinueve': '19',
+                'venti': '20', 'veinte': '20',
+                'trenta': '30', 'treinta': '30',
+                'quaranta': '40', 'cuarenta': '40',
+                'cinquanta': '50', 'cincuenta': '50',
+                'sessanta': '60', 'sesenta': '60',
+                'settanta': '70', 'setenta': '70',
+                'ottanta': '80', 'ochenta': '80',
+                'novanta': '90', 'noventa': '90'
+            };
+
+            // Sostituisci le parole con i numeri
+            Object.keys(numberMap).forEach(word => {
+                text = text.replace(new RegExp('\\b' + word + '\\b', 'g'), numberMap[word]);
+            });
+
+            // Estrai solo i numeri
+            const match = text.match(/\d+/);
+            return match ? match[0] : text;
+        }
+
+        function updateScoreDisplay() {
+            const scoreDisplay = document.getElementById('score-display');
+            scoreDisplay.textContent = `${phrases[selectedLanguage].score}: ${score}`;
+        }
+    </script>
+</body>
+
+</html>
