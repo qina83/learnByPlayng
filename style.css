@@ -245,11 +245,16 @@ body {
     background: rgba(255, 255, 255, 0.2);
     border: none;
     border-radius: 50%;
-    width: 40px;
-    height: 40px;
+    width: 44px;
+        height: 44px;
     font-size: 20px;
     cursor: pointer;
     color: white;
+    display: flex;
+        align-items: center;
+        justify-content: center;
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
 }
 
 .game-header h2 {
@@ -487,6 +492,14 @@ body {
     .color-grid {
         gap: 10px;
     }
+/* Miglior area di tocco per mobile */
+.back-btn {
+    width: 48px;
+    height: 48px;
+    font-size: 22px;
+    min-width: 48px;
+    min-height: 48px;
+}
 }
 
 /* Accessibilità */
