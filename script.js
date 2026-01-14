@@ -12,8 +12,18 @@ const languages = {
             numbers: "Numeri",
             animals: "Animali",
             shapes: "Forme"
-        },
-        feedback: {
+        }, numbers: {
+            zero: "zero",
+            one: "uno",
+            two: "due",
+            three: "tre",
+            four: "quattro",
+            five: "cinque",
+            six: "sei",
+            seven: "sette",
+            eight: "otto",
+            nine: "nove"
+        }, feedback: {
             correct: "🎉 Bravo!",
             wrong: "❌ Era {color}",
             tryAgain: "Riprova!"
@@ -31,8 +41,18 @@ const languages = {
             numbers: "Números",
             animals: "Animales",
             shapes: "Formas"
-        },
-        feedback: {
+        }, numbers: {
+            zero: "cero",
+            one: "uno",
+            two: "dos",
+            three: "tres",
+            four: "cuatro",
+            five: "cinco",
+            six: "seis",
+            seven: "siete",
+            eight: "ocho",
+            nine: "nueve"
+        }, feedback: {
             correct: "🎉 ¡Muy bien!",
             wrong: "❌ Era {color}",
             tryAgain: "¡Inténtalo de nuevo!"
@@ -50,8 +70,18 @@ const languages = {
             numbers: "Numbers",
             animals: "Animals",
             shapes: "Shapes"
-        },
-        feedback: {
+        }, numbers: {
+            zero: "zero",
+            one: "one",
+            two: "two",
+            three: "three",
+            four: "four",
+            five: "five",
+            six: "six",
+            seven: "seven",
+            eight: "eight",
+            nine: "nine"
+        }, feedback: {
             correct: "🎉 Great!",
             wrong: "❌ It was {color}",
             tryAgain: "Try again!"
@@ -65,7 +95,10 @@ let currentUser = '';
 let currentScore = 0;
 let currentColor = '';
 let currentColorSet = [];
+let currentNumber = 0;
+let currentNumberSet = [];
 let gameActive = false;
+let currentGameType = 'colors'; // 'colors' or 'numbers'
 let speechSynthesis = window.speechSynthesis;
 let recognition = null;
 
@@ -120,6 +153,8 @@ function setupEventListeners() {
             const game = this.dataset.game;
             if (game === 'colors') {
                 startColorGame();
+            } else if (game === 'numbers') {
+                startNumberGame();
             }
         });
     });
@@ -129,11 +164,25 @@ function setupEventListeners() {
     document.getElementById('playAgainBtn').addEventListener('click', playColorSound);
     document.getElementById('nextRoundBtn').addEventListener('click', nextRound);
 
+    // Controlli gioco numeri
+    document.getElementById('numberBackBtn').addEventListener('click', () => showScreen('gameScreen'));
+    document.getElementById('numberPlayAgainBtn').addEventListener('click', playNumberSound);
+    document.getElementById('numberNextRoundBtn').addEventListener('click', nextRound);
+
     // Click sui quadrati colorati
     document.querySelectorAll('.color-square').forEach(square => {
         square.addEventListener('click', function () {
-            if (gameActive) {
+            if (gameActive && currentGameType === 'colors') {
                 checkColor(this.dataset.color);
+            }
+        });
+    });
+
+    // Click sui quadrati dei numeri
+    document.querySelectorAll('.number-square').forEach(square => {
+        square.addEventListener('click', function () {
+            if (gameActive && currentGameType === 'numbers') {
+                checkNumber(this.dataset.number);
             }
         });
     });
@@ -176,6 +225,8 @@ function updateLanguageTexts() {
     document.getElementById('gameTitle').textContent = lang.gameTitle;
     document.getElementById('colorGameTitle').textContent = lang.colorGameTitle;
     document.getElementById('gameInstruction').textContent = lang.instruction;
+    document.getElementById('numberGameTitle').textContent = `🔢 ${lang.games.numbers}`;
+    document.getElementById('numberGameInstruction').textContent = lang.instruction.replace('colore', 'numero').replace('color', 'number').replace('color', 'número');
 
     // Aggiorna nomi dei giochi
     document.getElementById('colorsGameLabel').textContent = lang.games.colors;
@@ -236,7 +287,15 @@ function confirmName() {
 }
 
 function startColorGame() {
+    currentGameType = 'colors';
     showScreen('colorGameScreen');
+    resetGame();
+    nextRound();
+}
+
+function startNumberGame() {
+    currentGameType = 'numbers';
+    showScreen('numberGameScreen');
     resetGame();
     nextRound();
 }
@@ -244,23 +303,49 @@ function startColorGame() {
 function resetGame() {
     gameActive = false;
     currentColor = '';
-    document.querySelectorAll('.color-square').forEach(square => {
-        square.classList.remove('correct', 'wrong');
-    });
-    document.getElementById('feedback').textContent = '';
-    document.getElementById('nextRoundBtn').style.display = 'none';
+    currentNumber = 0;
+
+    if (currentGameType === 'colors') {
+        document.querySelectorAll('.color-square').forEach(square => {
+            square.classList.remove('correct', 'wrong');
+        });
+        document.getElementById('feedback').textContent = '';
+        document.getElementById('nextRoundBtn').style.display = 'none';
+    } else if (currentGameType === 'numbers') {
+        document.querySelectorAll('.number-square').forEach(square => {
+            square.classList.remove('correct', 'wrong');
+        });
+        document.getElementById('numberFeedback').textContent = '';
+        document.getElementById('numberNextRoundBtn').style.display = 'none';
+    }
 }
 
 function nextRound() {
     resetGame();
 
-    // Genera una nuova combinazione di 4 colori casuali chiaramente diversi
-    generateNewColors();
+    if (currentGameType === 'colors') {
+        // Genera una nuova combinazione di 4 colori casuali chiaramente diversi
+        generateNewColors();
 
-    // Seleziona uno dei 4 colori come quello da indovinare
-    const randomIndex = Math.floor(Math.random() * 4);
-    currentColor = currentColorSet[randomIndex];
-    playColorSound();
+        // Seleziona uno dei 4 colori come quello da indovinare
+        const randomIndex = Math.floor(Math.random() * 4);
+        currentColor = currentColorSet[randomIndex];
+
+        setTimeout(() => {
+            playColorSound();
+        }, 1000);
+    } else if (currentGameType === 'numbers') {
+        // Genera una nuova combinazione di 4 numeri casuali
+        generateNewNumbers();
+
+        // Seleziona uno dei 4 numeri come quello da indovinare
+        const randomIndex = Math.floor(Math.random() * 4);
+        currentNumber = currentNumberSet[randomIndex];
+
+        setTimeout(() => {
+            playNumberSound();
+        }, 1000);
+    }
 }
 
 function generateNewColors() {
@@ -370,6 +455,151 @@ function showScreen(screenId) {
         screen.classList.remove('active');
     });
     document.getElementById(screenId).classList.add('active');
+}
+
+// Funzioni per il gioco dei numeri
+function generateNewNumbers() {
+    // Seleziona 4 numeri casuali da 0 a 99 assicurandosi che siano diversi
+    const availableNumbers = [];
+    for (let i = 0; i <= 10; i++) {
+        availableNumbers.push(i);
+    }
+
+    currentNumberSet = [];
+
+    for (let i = 0; i < 4; i++) {
+        const randomIndex = Math.floor(Math.random() * availableNumbers.length);
+        const selectedNumber = availableNumbers.splice(randomIndex, 1)[0];
+        currentNumberSet.push(selectedNumber);
+    }
+
+    // Aggiorna i quadrati con i nuovi numeri
+    const numberSquares = document.querySelectorAll('.number-square');
+    numberSquares.forEach((square, index) => {
+        square.textContent = currentNumberSet[index];
+        square.dataset.number = index.toString();
+    });
+}
+
+function getNumberLabel(number) {
+    // Funzione per convertire numeri in parole nelle tre lingue
+    const numberToWords = {
+        it: {
+            0: 'zero', 1: 'uno', 2: 'due', 3: 'tre', 4: 'quattro', 5: 'cinque',
+            6: 'sei', 7: 'sette', 8: 'otto', 9: 'nove', 10: 'dieci',
+            11: 'undici', 12: 'dodici', 13: 'tredici', 14: 'quattordici', 15: 'quindici',
+            16: 'sedici', 17: 'diciassette', 18: 'diciotto', 19: 'diciannove', 20: 'venti',
+            30: 'trenta', 40: 'quaranta', 50: 'cinquanta', 60: 'sessanta',
+            70: 'settanta', 80: 'ottanta', 90: 'novanta'
+        },
+        es: {
+            0: 'cero', 1: 'uno', 2: 'dos', 3: 'tres', 4: 'cuatro', 5: 'cinco',
+            6: 'seis', 7: 'siete', 8: 'ocho', 9: 'nueve', 10: 'diez',
+            11: 'once', 12: 'doce', 13: 'trece', 14: 'catorce', 15: 'quince',
+            16: 'dieciseis', 17: 'diecisiete', 18: 'dieciocho', 19: 'diecinueve', 20: 'veinte',
+            30: 'treinta', 40: 'cuarenta', 50: 'cincuenta', 60: 'sesenta',
+            70: 'setenta', 80: 'ochenta', 90: 'noventa'
+        },
+        en: {
+            0: 'zero', 1: 'one', 2: 'two', 3: 'three', 4: 'four', 5: 'five',
+            6: 'six', 7: 'seven', 8: 'eight', 9: 'nine', 10: 'ten',
+            11: 'eleven', 12: 'twelve', 13: 'thirteen', 14: 'fourteen', 15: 'fifteen',
+            16: 'sixteen', 17: 'seventeen', 18: 'eighteen', 19: 'nineteen', 20: 'twenty',
+            30: 'thirty', 40: 'forty', 50: 'fifty', 60: 'sixty',
+            70: 'seventy', 80: 'eighty', 90: 'ninety'
+        }
+    };
+
+    const lang = numberToWords[currentLanguage];
+
+    // Per numeri da 0 a 20
+    if (number <= 20) {
+        return lang[number];
+    }
+
+    // Per numeri da 21 a 99
+    if (number < 100) {
+        const tens = Math.floor(number / 10) * 10;
+        const ones = number % 10;
+
+        if (ones === 0) {
+            return lang[tens];
+        }
+
+        // Gestione speciale per ogni lingua
+        if (currentLanguage === 'it') {
+            if (tens === 20 || tens === 30) {
+                // Venti -> vent, trenta -> trent per elisione
+                const baseTen = lang[tens].slice(0, -1);
+                return baseTen + lang[ones];
+            }
+            return lang[tens] + lang[ones];
+        } else if (currentLanguage === 'es') {
+            if (tens === 20) {
+                // Numeri da 21 a 29 hanno forma speciale in spagnolo
+                return 'veinti' + (ones === 1 ? 'uno' : lang[ones]);
+            }
+            return lang[tens] + ' y ' + lang[ones];
+        } else { // inglese
+            return lang[tens] + '-' + lang[ones];
+        }
+    }
+
+    return number.toString();
+}
+
+function playNumberSound() {
+    if (currentNumber !== undefined) {
+        const numberLabel = getNumberLabel(currentNumber);
+        speak(numberLabel);
+        gameActive = true;
+    }
+}
+
+function checkNumber(selectedNumberIndex) {
+    if (!gameActive) return;
+
+    gameActive = false;
+    const feedback = document.getElementById('numberFeedback');
+    const selectedSquare = document.querySelector(`[data-number="${selectedNumberIndex}"]`);
+
+    // Trova l'indice del numero corretto
+    const correctIndex = currentNumberSet.findIndex(num => num === currentNumber);
+    const correctSquare = document.querySelector(`[data-number="${correctIndex}"]`);
+
+    if (parseInt(selectedNumberIndex) === correctIndex) {
+        // Risposta corretta
+        selectedSquare.classList.add('correct');
+        feedback.textContent = languages[currentLanguage].feedback.correct;
+        feedback.className = 'feedback success';
+
+        currentScore++;
+        document.getElementById('score').textContent = `🏆 ${currentScore}`;
+
+        speak(languages[currentLanguage].feedback.correct.replace('🎉 ', ''));
+
+        // Passa automaticamente al prossimo round dopo 1.5 secondi
+        setTimeout(() => {
+            nextRound();
+        }, 1500);
+
+    } else {
+        // Risposta sbagliata
+        selectedSquare.classList.add('wrong');
+        correctSquare.classList.add('correct');
+
+        const wrongMsg = languages[currentLanguage].feedback.wrong
+            .replace('{color}', getNumberLabel(currentNumber));
+        feedback.textContent = wrongMsg;
+        feedback.className = 'feedback error';
+
+        speak(wrongMsg.replace('❌ ', ''));
+
+        // Per le risposte sbagliate, mostra il pulsante per continuare
+        setTimeout(() => {
+            document.getElementById('numberNextRoundBtn').style.display = 'block';
+        }, 2000);
+    }
 }
 
 // Gestione dello stato della pagina per evitare perdita di dati

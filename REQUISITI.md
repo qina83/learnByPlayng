@@ -22,3 +22,7 @@ Gioco dei colori
 - dopo ogni punto vengono ricaricati nuovi colori
 - dopo la risposta giusta si deve passare automaticamente al nuovo set di colori
 
+
+Gioco dei numeri
+- è come il gioco dei colori, ma con i numeri
+

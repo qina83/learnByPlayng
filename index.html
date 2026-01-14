@@ -60,8 +60,8 @@
                 🎨
                 <span id="colorsGameLabel">Colori</span>
             </button>
-            <button class="game-btn locked">
-                🔒
+            <button class="game-btn" data-game="numbers">
+                🔢
                 <span id="numbersGameLabel">Numeri</span>
             </button>
             <button class="game-btn locked">
@@ -95,6 +95,28 @@
             <button id="nextRoundBtn" class="next-btn" style="display: none;">➡️</button>
         </div>
         <div class="feedback" id="feedback"></div>
+    </div>
+
+    <!-- Gioco dei numeri -->
+    <div id="numberGameScreen" class="screen">
+        <div class="game-header">
+            <button id="numberBackBtn" class="back-btn">↩️</button>
+            <h2 id="numberGameTitle">🔢 Gioco dei Numeri</h2>
+        </div>
+        <div class="game-instruction" id="numberGameInstruction">
+            Clicca il numero che senti!
+        </div>
+        <div class="number-grid">
+            <div class="number-square" data-number="0"></div>
+            <div class="number-square" data-number="1"></div>
+            <div class="number-square" data-number="2"></div>
+            <div class="number-square" data-number="3"></div>
+        </div>
+        <div class="game-controls">
+            <button id="numberPlayAgainBtn" class="play-btn">🔊</button>
+            <button id="numberNextRoundBtn" class="next-btn" style="display: none;">➡️</button>
+        </div>
+        <div class="feedback" id="numberFeedback"></div>
     </div>
 
     <!-- Audio elements -->
